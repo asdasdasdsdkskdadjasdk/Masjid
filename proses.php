@@ -111,6 +111,7 @@ class proses extends fb{
 				],
 				'prayName'	=> [
 					'fajr'		=> 'Subuh',
+					'sunrise'   => 'Syuruq',
 					'dhuhr'		=> 'Dzuhur',
 					'asr'		=> 'Ashar',
 					'maghrib'	=> 'Maghrib',
@@ -279,8 +280,7 @@ class proses extends fb{
 		// $this->data	= $_FILES;
 		
 		if(isset($_FILES)){
-			$allowed_ext =  array('jpg');
-			$i=0;
+        	$allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm'];			$i=0;
 			foreach($_FILES as $file){
 				if($file['size']>0){
 					$ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -439,61 +439,82 @@ class proses extends fb{
 		// echo $my_var;
 	}
 	private function wallpaper(){
-		$db	= $this->database;
-		$id	= 'wallpaper';
-		$wp	= $this->getWallpaper();
-		ob_start();
-		echo '
-			<section class="content-header content-dynamic section-wallpaper">
-			<div class="row">
-		';
-		// echo '<pre>'.print_r($wp,1).'</pre>';
-		?>
-		<div class="col-md-12 col-sm-12 col-xs-12">
-			<form method="post" class="form-file" enctype="multipart/form-data">
-			<div class="box box-info">
-				<div class="box-header with-border">
-					<h3 class="box-title">Tambah wallpaper</h3>
-					<div class="box-tools pull-right">
-						<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-					</div>
-				</div>
-				<div class="box-body">
-					<div class="input-group">
-					  <span class="input-group-addon">File wallpaper</span>
-					  <input type="file" multiple="" class="form-control input-sm" placeholder="" data-proses="saveWallpaper">
-					</div>
-					<div class="input">
-						<small>
-						- Ext file yang didukung :  <b>.jpg</b><br>
-						- Ukuran maksimal <b>2Mb</b><br>
-						- Maksimal 5 file dalam sekali upload<br>
-						- Tips : Jika ukuran gambar > 2Mb, cara cepat kompres gambar ⇒ kirim ke whatsapp :P
-						</small>
-					</div>
-				</div>
-				<div class="box-footer">
-					<button type="submit" class="btn btn-primary pull-right"><i class="fa fa-upload" aria-hidden="true"></i> upload</button>
-				</div>
-			</div>
-			</form>
-		</div>
-		<?php
-		foreach($wp as $v):
-		?>
-		<div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="small-box" style="background-image: url(display/wallpaper/<?=$v?>);">
-            <div class="inner"></div>
-            <a href="javascript:void(0)" data-file="<?=$v?>" class="small-box-footer"><i class="fa fa-trash"></i> delete</a>
-          </div>
+    $db = $this->database;
+    $id = 'wallpaper';
+    $wp = $this->getWallpaper();
+    ob_start();
+    echo '
+        <section class="content-header content-dynamic section-wallpaper">
+        <div class="row">
+    ';
+    // echo '<pre>'.print_r($wp,1).'</pre>';
+    ?>
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <form method="post" class="form-file" enctype="multipart/form-data">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Tambah wallpaper</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="input-group">
+                    <span class="input-group-addon">File wallpaper</span>
+                    <input type="file" multiple="" class="form-control input-sm" placeholder="" data-proses="saveWallpaper">
+                </div>
+                <div class="input">
+                    <small>
+                        - Ext file yang didukung:  <b>.jpg, .jpeg, .png, .gif</b> (Gambar) dan <b>.mp4, .webm, .ogg</b> (Video)<br>
+                        - Ukuran maksimal <b>10Mb</b> (Dapat diubah di fn.js)<br>
+                        - Maksimal 5 file dalam sekali upload<br>
+                        </small>
+                </div>
+            </div>
+            <div class="box-footer">
+                <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-upload" aria-hidden="true"></i> upload</button>
+            </div>
         </div>
-		<?php 
+        </form>
+    </div>
+    
+    <?php
+    // >>>>>>>>>> KODE BARU DIMULAI DI SINI <<<<<<<<<<
+
+    // Tentukan ekstensi file yang diizinkan sebagai video
+    $video_exts = ['mp4', 'webm', 'ogg']; 
+
+    foreach($wp as $v):
+			$ext = strtolower(pathinfo($v, PATHINFO_EXTENSION));
+			$style = '';
+			$content = '';
+
+			if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+				$style = 'background-image: url(display/wallpaper/'.$v.');';
+				$content = '<div class="inner"></div>';
+			} elseif (in_array($ext, $video_exts)) {
+				$style = 'background-color: #3c8dbc;';
+				$icon = '<i class="fa fa-video-camera fa-5x" style="color:white; opacity:0.7"></i>';
+				$content = '<div class="inner" style="min-height:100px; padding: 15px; text-align:center;">'.$icon.'<br><p style="color:white; font-size: 14px; margin-top: 10px;">VIDEO FILE</p></div>';
+			} else {
+				 continue;
+		}
+		?>
+			<div class="col-md-4 col-sm-6 col-xs-12">
+				<div class="small-box" style="<?=$style?>">
+				<?=$content?>
+					<a href="javascript:void(0)" data-file="<?=$v?>" class="small-box-footer"><i class="fa fa-trash"></i> delete</a>
+				</div>
+            </div>
+        <?php 
 		endforeach;
+
 		echo '</div></section>';
 		$this->data = ob_get_clean();
 		$this->retSuccess();
-		// echo $my_var;
-	}
+	}	
+    // echo $my_var;
+
 	
 	private function running_text(){
 		$db	= $this->database;
@@ -1559,8 +1580,8 @@ isha		= 18°
 	*/
 	
 	
-	
 }
+
 $request=isset($_POST['id'])?$_POST['id']:"UNKNOWN_REQUEST_________________________________________";
 new proses($request);
 ?>

@@ -234,8 +234,8 @@ var app = {
 							verification = false;
 							return;
 						}
-						else if(files[i].size > 2000000){
-							alert(files[i].name+' lebih > 2Mb');
+						else if(files[i].size > 20000000){
+							alert(files[i].name+' lebih > 10Mb');
 							verification = false;
 							return;
 						}
@@ -431,6 +431,7 @@ var app = {
 				// console.log('jadwal - tune :');
 				// console.log(dt['prayTimesTune']);
 			}
+			
 			
 			let thead	= '<thead><tr><th>' + (dt['thead'].join('</th><th>')) + '</th></tr></thead>';
 			// console.log(thead);

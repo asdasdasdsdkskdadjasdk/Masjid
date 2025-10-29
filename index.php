@@ -1,14 +1,20 @@
 <?php
+// Perbaikan 1: Pastikan session.php tidak memiliki output, spasi, atau BOM sebelum tag <?php
 include_once "session.php";
 if(!isset($_SESSION["user_id"])){
 	header("Location: login.php");
 }
+
 $file	= 'db/database.json';
-$name	= '';
+// Perbaikan 2: Inisialisasi variabel $name dengan nilai default untuk mencegah 'Undefined variable'
+$name	= 'Display|Masjid'; // Beri nilai default
 if (file_exists($file)){
 	$json 	= file_get_contents($file);
 	$db		= json_decode($json, true);
-	$name	= $db['setting']['nama'];
+	// Pastikan kunci 'setting' dan 'nama' ada sebelum diakses
+	if(isset($db['setting']['nama'])) {
+		$name	= $db['setting']['nama'];
+	}
 }
 ?>
 
@@ -19,13 +25,14 @@ if (file_exists($file)){
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Display|Masjid|Admin</title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-<link rel="icon" type="image/png" href="/Masjid/icon.png"/>
-<link rel="stylesheet" href="/Masjid/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/Masjid/dist/css/font-awesome.min.css">
-<link rel="stylesheet" href="/Masjid/dist/css/AdminLTE.min.css">
-<link rel="stylesheet" href="/Masjid/dist/css/_all-skins.min.css">
-<link rel="stylesheet" href="/Masjid/dist/css/bootstrap-datetimepicker.css">
-<link rel="stylesheet" href="/Masjid/dist/css/datatables.min.css">
+<link rel="icon" type="image/png" href="icon.png"/>
+<link rel="stylesheet" href="dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="dist/css/font-awesome.min.css">
+<link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+<link rel="stylesheet" href="dist/css/_all-skins.min.css">
+<link rel="stylesheet" href="dist/css/bootstrap-datetimepicker.css">
+<link rel="stylesheet" href="dist/css/datatables.min.css">
+<link rel="stylesheet" href="dist/css/buttons.dataTables.min.css">
 	<style>
 		button.info-box{
 			padding:0;
@@ -134,11 +141,8 @@ if (file_exists($file)){
       </div>
     </nav>
   </header>
-  <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
-    <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-      <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">NAVIGATION</li>
 		<li class="active"><a data-target="info"><i class="fa fa-comment"></i> <span>Informasi</span></a></li>
@@ -153,11 +157,9 @@ if (file_exists($file)){
 		<li><a data-target="logout"><i class="fa fa-sign-out"></i> <span>Logout</span></a></li>
       </ul>
     </section>
-    <!-- /.sidebar -->
-  </aside>
+    </aside>
 
-  <!-- Content Wrapper. Contains page content -->
-	<div id='container' class="content-wrapper">
+  <div id='container' class="content-wrapper">
 	</div>
 	<footer class="main-footer">
 		<div class="pull-right">
@@ -165,15 +167,16 @@ if (file_exists($file)){
 		</div>
 		<strong>Display|Masjid</strong> Aplication
 	</footer>
-	<!-- <script src="cordova.js"></script> -->
-<script src="/Masjid/dist/js/jquery.min.js"></script>
-<script src="/Masjid/dist/js/bootstrap.min.js"></script>
-<script src="/Masjid/dist/js/swipe.js"></script>
-<script src="/Masjid/dist/js/adminlte.min.js"></script>
-<script src="/Masjid/dist/js/moment-with-locales.js"></script>
-<script src="/Masjid/dist/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/Masjid/dist/js/datatables.min.js"></script>
-<script src="/Masjid/display/js/PrayTimes.js"></script>
-<script src="/Masjid/dist/js/fn.js"></script>
+	<script src="dist/js/jquery.min.js"></script>
+<script src="dist/js/bootstrap.min.js"></script>
+<script src="dist/js/swipe.js"></script>
+<script src="dist/js/adminlte.min.js"></script>
+<script src="dist/js/moment-with-locales.js"></script>
+<script src="dist/js/bootstrap-datetimepicker.min.js"></script>
+<script src="dist/js/datatables.min.js"></script>
+<!-- <script src="dist/js/dataTables.buttons.min.js"></script> -->
+<!-- <script src="dist/js/buttons.html5.min.js"></script> -->
+<script src="display/js/PrayTimes.js"></script>
+<script src="dist/js/fn.js"></script>
 </body>
 </html>

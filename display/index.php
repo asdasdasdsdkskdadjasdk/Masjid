@@ -31,13 +31,32 @@
 	
 	$dir	= 'wallpaper/';
 	$files	= array_diff(scandir($dir),array('.','..','Thumbs.db'));
+	$video_exts = ['mp4', 'webm'];
 	$wallpaper	= '';
 	$i	= 0;
 	foreach($files as $v){
-		$active	= $i==0?'active':'';
-		$wallpaper	.= '<div class="item slides '.$active.'"><div style="background-image: url(wallpaper/'.$v.');"></div></div>';
-		$i++;
-	}
+    $active = $i==0?'active':'';
+    $ext = pathinfo($v, PATHINFO_EXTENSION);
+    $ext_lower = strtolower($ext);
+    $html_content = '';
+    $data_video_attr = ''; // Atribut baru untuk menandai video
+
+    if (in_array($ext_lower, ['jpg', 'jpeg', 'png', 'gif'])) {
+        // Jika file adalah GAMBAR
+        $html_content = '<div style="background-image: url(wallpaper/'.$v.');"></div>';
+    } elseif (in_array($ext_lower, $video_exts)) {
+        // Jika file adalah VIDEO
+        // Hapus loop, karena JavaScript akan mengontrol putaran penuh
+        $html_content = '<video autoplay muted><source src="wallpaper/'.$v.'" type="video/'.$ext_lower.'"></video>';
+        $data_video_attr = ' data-is-video="true"'; // Tandai slide ini sebagai video
+    }
+
+    if ($html_content !== '') {
+        // Tambahkan atribut data-is-video ke div item
+        $wallpaper  .= '<div class="item slides '.$active.'"'.$data_video_attr.'>'.$html_content.'</div>';
+        $i++;
+    }
+}
 	// print_r($files);die;
 ?>
 
@@ -55,7 +74,21 @@
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 	<style>
-		
+		/* Di dalam display/index.php atau display/css/style.css */
+.carousel .item video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
 	</style>
 </head>
 
@@ -79,8 +112,7 @@
 	<div id="display-khutbah" class="full-screen" style="display:none"><div></div></div>
 	
 	
-	<div class="carousel fade-carousel slide" data-ride="carousel" data-interval="<?=$wallpaper_timer?>">
-	  <!-- Overlay -->
+	<div id="main-wallpaper-carousel" class="carousel fade-carousel slide" data-ride="carousel" data-interval="false">	  <!-- Overlay -->
 	  <div class="overlay"></div>
 	  <!-- Wrapper for slides -->
 	  <div class="carousel-inner"><?=$wallpaper?></div> 
@@ -570,6 +602,60 @@
 			}
 		}
 		app.initialize();
+
+		/* Tambahkan logika ini ke file display/index.php, setelah inisialisasi app */
+var wallpaper_timer_ms = <?=$info_timer?>; // Menggunakan timer info sebagai fallback jika carousel gagal.
+var carousel_element = $('#main-wallpaper-carousel');
+var current_slide_timer;
+
+function startSlideTimer(duration) {
+    // Hentikan timer yang sedang berjalan
+    clearTimeout(current_slide_timer);
+    
+    current_slide_timer = setTimeout(function() {
+        carousel_element.carousel('next'); // Pindah ke slide berikutnya
+    }, duration);
+}
+
+function handleSlideChange(e) {
+    var next_slide = $(e.relatedTarget);
+    var is_video = next_slide.attr('data-is-video');
+
+    if (is_video === 'true') {
+        // 1. Matikan timer standar carousel
+        carousel_element.carousel('pause'); 
+        
+        // 2. Temukan elemen video
+        var video = next_slide.find('video')[0];
+        if (video) {
+            // Hentikan timer default (penting jika ini adalah slide video kedua)
+            clearTimeout(current_slide_timer); 
+            
+            // Atur volume ke 0 (karena kita pakai muted di HTML)
+            video.volume = 0; 
+
+            // Hapus listener yang lama
+            $(video).off('ended.videoControl'); 
+
+            // Tambahkan listener untuk event selesai
+            $(video).on('ended.videoControl', function() {
+                carousel_element.carousel('next'); // Pindah ke slide berikutnya
+            });
+
+            // Putar video dari awal
+            video.play();
+        }
+    } else {
+        // Jika ini bukan video, mulai timer standar
+        startSlideTimer(<?=$wallpaper_timer?>); 
+    }
+}
+
+// Tambahkan event listener untuk peristiwa perpindahan slide
+carousel_element.on('slid.bs.carousel', handleSlideChange);
+
+// Inisialisasi: Panggil logika untuk slide pertama saat aplikasi dimulai
+handleSlideChange({relatedTarget: carousel_element.find('.item.active')[0]});
 	</script>
 </body>
 </html>
