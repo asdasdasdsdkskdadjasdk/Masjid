@@ -148,6 +148,7 @@ if (file_exists($file)){
 		<li class="active"><a data-target="info"><i class="fa fa-comment"></i> <span>Informasi</span></a></li>
 		<li><a data-target="running_text"><i class="fa fa-text-width"></i> <span>Running text</span></a></li>
 		<li><a data-target="wallpaper"><i class="fa fa-television"></i> <span>Wallpaper</span></a></li>
+		<li><a data-target="youtube"><i class="fa fa-youtube-play"></i> <span>YouTube Display</span></a></li>  
 		<li><a data-target="timer"><i class="fa fa-clock-o"></i> <span>Timer</span></a></li>
 		<li><a data-target="jadwal"><i class="fa fa-calendar"></i> <span>Setting Jadwal</span></a></li>
 		<li><a data-target="simulasi"><i class="fa fa-history"></i> <span>Simulasi Jadwal</span></a></li>

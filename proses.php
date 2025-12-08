@@ -168,6 +168,12 @@ class proses extends fb{
 					'active'	=> true,
 					'duration'	=> 180	//180 menit = 3 jam --> muncul display sholat --> urutan : adzan-iqomah-sholat(isya')-tarawih
 				],
+				'youtube_display' => [ // <--- BARIS BARU: YOUTUBE DISPLAY
+                    'link'      => '',
+                    'duration'  => 5, // Durasi default 5 menit
+                    'active'    => false,
+					'delay_after_sholat' => 1 // <--- BARIS BARU: Delay default 1 menit
+                ],
 				'info'	=> [
 					[
 						'Aplikasi Display-Masjid',
@@ -1558,6 +1564,69 @@ isha		= 18°
 		}
 		return $opt;
 	}
+
+	// [Tambahkan di bagian VIEW di proses.php]
+
+protected function youtube(){
+    $db = $this->database;
+    $youtube = $db['youtube_display'];
+    $arrActive  = ['Ya' => true, 'Tidak' => false];
+    
+    $formYoutube = [
+        'aktif' => [
+            'name'  => 'active',
+            'type'  => 'select',
+            'arr'   => $arrActive,
+            'value' => $youtube['active'],
+            'rev'   => false
+        ],
+        'link video (ID)' => [
+            'name'  => 'link',
+            'type'  => 'text',
+            'maxlength' => 50,
+            'value' => $youtube['link'],
+            'placeholder' => 'Contoh: dQw4w9WgXcQ'
+        ],
+        'durasi tayang' => [
+            'name'  => 'duration',
+            'type'  => 'number',
+            'min'   => 1,
+            'max'   => 60,
+            'step'  => 1,
+            'value' => $youtube['duration'],
+            'required'  => true,
+            'addon' => 'menit'
+		],
+		'delay (setelah sholat)' => [ // <--- BARIS BARU: DELAY
+        'name'  => 'delay_after_sholat',
+        'type'  => 'number',
+        'min'   => 0,
+        'max'   => 30, // Batas waktu tunda
+        'step'  => 1,
+        'value' => $youtube['delay_after_sholat'],
+        'required'  => true,
+        'addon' => 'menit'
+    ],
+    ];
+    $setYoutube = [
+        'id'    => 'youtube_display',
+        'title' => 'Video YouTube Setelah Sholat',
+        'info'  => 'Masukkan ID video YouTube (bukan link penuh). Contoh: dari link https://youtu.be/dQw4w9WgXcQ, Anda hanya perlu mengisi dQw4w9WgXcQ. Durasi adalah berapa menit video tayang setelah sholat.'
+    ];
+    
+    ob_start();
+    echo '
+        <section class="content-header content-dynamic">
+        <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+    ';
+    
+    echo $this->generateCompleteForm($formYoutube, $setYoutube);
+    
+    echo '</div></div></section>';
+    $this->data = ob_get_clean();
+    $this->retSuccess();
+}
 	
 	
 	

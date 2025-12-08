@@ -234,18 +234,18 @@ var app = {
 							verification = false;
 							return;
 						}
-						else if(files[i].size > 20000000){
-							alert(files[i].name+' lebih > 10Mb');
+						else if(files[i].size > 104857600){
+							alert(files[i].name + ' lebih > 100Mb'); // Jangan lupa ubah teks alert-nya juga
 							verification = false;
 							return;
 						}
-						/* cek di server
-						else if (files[i].type!="image/jpeg") {
-							alert(files[i].name+' : ext file bukan jpg');
+						// cek di server
+						else if (files[i].type!="image/jpeg" && files[i].type!="video/mp4") {
+							alert(files[i].name+' : ext file bukan jpg atau mp4');
 							verification = false;
 							return;
 						}
-						*/
+						
 						// console.log(files[i]);
 						form_data.append('file' + i, files[i]);
 						verification = true;

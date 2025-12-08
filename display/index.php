@@ -31,32 +31,32 @@
 	
 	$dir	= 'wallpaper/';
 	$files	= array_diff(scandir($dir),array('.','..','Thumbs.db'));
-	$video_exts = ['mp4', 'webm'];
+	$video_exts = ['mp4', 'webm', 'ogg'];
 	$wallpaper	= '';
 	$i	= 0;
 	foreach($files as $v){
-    $active = $i==0?'active':'';
-    $ext = pathinfo($v, PATHINFO_EXTENSION);
-    $ext_lower = strtolower($ext);
-    $html_content = '';
-    $data_video_attr = ''; // Atribut baru untuk menandai video
+		$active	= $i==0?'active':'';
+		$ext = pathinfo($v, PATHINFO_EXTENSION);
+		$ext_lower = strtolower($ext);
+		$html_content = '';
+		$data_video_attr = '';
 
-    if (in_array($ext_lower, ['jpg', 'jpeg', 'png', 'gif'])) {
-        // Jika file adalah GAMBAR
-        $html_content = '<div style="background-image: url(wallpaper/'.$v.');"></div>';
-    } elseif (in_array($ext_lower, $video_exts)) {
-        // Jika file adalah VIDEO
-        // Hapus loop, karena JavaScript akan mengontrol putaran penuh
-        $html_content = '<video autoplay muted><source src="wallpaper/'.$v.'" type="video/'.$ext_lower.'"></video>';
-        $data_video_attr = ' data-is-video="true"'; // Tandai slide ini sebagai video
-    }
+		if (in_array($ext_lower, ['jpg', 'jpeg', 'png', 'gif'])) {
+			// Jika file adalah GAMBAR
+			$html_content = '<div style="background-image: url(wallpaper/'.$v.');"></div>';
+		} elseif (in_array($ext_lower, $video_exts)) {
+			// Jika file adalah VIDEO
+			// Hapus loop, karena JavaScript akan mengontrol putaran penuh
+			$html_content = '<video autoplay muted><source src="wallpaper/'.$v.'" type="video/'.$ext_lower.'"></video>';
+			$data_video_attr = ' data-is-video="true"'; // Tandai slide ini sebagai video
+		}
 
-    if ($html_content !== '') {
-        // Tambahkan atribut data-is-video ke div item
-        $wallpaper  .= '<div class="item slides '.$active.'"'.$data_video_attr.'>'.$html_content.'</div>';
-        $i++;
-    }
-}
+		if ($html_content !== '') {
+			// Tambahkan atribut data-is-video ke div item
+			$wallpaper	.= '<div class="item slides '.$active.'"'.$data_video_attr.'>'.$html_content.'</div>';
+			$i++;
+		}
+	}
 	// print_r($files);die;
 ?>
 
@@ -69,12 +69,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Display|Masjid</title>
     <link rel="icon" type="image/png" href="../icon.png"/>
-    <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 	<style>
-		/* Di dalam display/index.php atau display/css/style.css */
+/* --- KOREKSI UMUM: Menghilangkan margin body --- */
+body {
+    margin: 0 !important; 
+    padding: 0 !important;
+}
+
 .carousel .item video {
     position: absolute;
     top: 50%;
@@ -89,7 +93,42 @@
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
 }
-	</style>
+
+/* --- KOREKSI POSISI DAN UKURAN YOUTUBE FINAL --- */
+#display-youtube {
+    position: fixed; 
+    top: 0; 
+    
+    /* LEFT: Geser kontainer lebih ke kanan (350px lebar jadwal + 10px spasi) */
+    left: 360px; 
+    
+    /* WIDTH: Kontainer mengambil sisa lebar yang tersisa di viewport */
+    /* Menggunakan 360px agar ada 10px spasi dari kanan jadwal (350px) */
+    width: calc(100% - 350px); 
+    
+    /* TINGGI: 100% Viewport dikurangi tinggi running text (70px) */
+    height: calc(100vh - 70px); 
+    
+    z-index: 10; 
+    background-color: transparent; /* PENTING: Ubah latar belakang menjadi transparan */
+    
+    /* Flexbox: Rata kanan */
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center; 
+    
+    padding-left: 0; /* Hapus padding yang berlebihan */
+}
+
+#display-youtube iframe {
+    /* IFRAME: Atur agar mengecil sedikit */
+    /* Anda ingin video terlihat 10px lebih kecil dari batas kiri kontainer, 
+       tapi rata kanan. Kurangi 10px dari 100%. */
+    width: calc(100% - 30px); 
+    height: 100%;
+    display: block;
+}
+</style>
 </head>
 
 <body>
@@ -110,11 +149,13 @@
 	<div id="display-adzan" class="full-screen" style="display:none"><div></div></div>
 	<div id="display-sholat" class="full-screen" style="display:none"></div>
 	<div id="display-khutbah" class="full-screen" style="display:none"><div></div></div>
+    
+    <div id="display-youtube" style="display:none">
+        <iframe width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    </div>
 	
-	
-	<div id="main-wallpaper-carousel" class="carousel fade-carousel slide" data-ride="carousel" data-interval="false">	  <!-- Overlay -->
+	<div id="main-wallpaper-carousel" class="carousel fade-carousel slide" data-ride="carousel" data-interval="false">
 	  <div class="overlay"></div>
-	  <!-- Wrapper for slides -->
 	  <div class="carousel-inner"><?=$wallpaper?></div> 
 	</div>
 	
@@ -162,7 +203,6 @@
 		<div id="logo" style="background-image: url(logo/<?=$logo?>);"></div>
 		<div id="running-text">
 			<div class="item">
-				<!-- <div class="text"> -->
 				<marquee>
 				<?php 
 					foreach($db['running_text'] as $k => $v){
@@ -187,8 +227,7 @@
 					}
 				?>
 				</marquee>
-				<!-- </div> -->
-			</div>
+				</div>
 		</div>
 	</div>
     <script src="js/jquery-3.4.1.min.js"></script>
@@ -281,14 +320,19 @@
 			jadwalHariIni	: {},
 			jadwalBesok		: {},
 			timer			: false,
+			// TIMER BARU
+			sholatTimer: false,
+			youtubeTimer: false,
+            // END TIMER BARU
 			// waitAdzanTimer	: false,	// Display countdown sebelum adzan
 			adzanTimer		: false,	// Display adzan
 			countDownTimer	: false,	// Display countdown iqomah
-			sholatTimer		: false,	// Display sholat
+			// sholatTimer		: false,	// Display sholat <-- DIHAPUS DAN DIGANTI DI ATAS
 			khutbahTimer	: false,	// Display khutbah
 			nextPrayCount	: 0,		// start next pray count-down
 			// nextPrayTimer	: false,	// Display countdown ke sholat selanjutnya
 			fajr	: '',
+            sunrise: '', // Tambahkan sunrise
 			dhuhr	: '',
 			asr		: '',
 			maghrib	: '',
@@ -319,6 +363,7 @@
 					// console.log(app.jadwalHariIni);
 					// console.log(app.jadwalBesok);
 					app.fajr	= moment(app.jadwalHariIni.fajr,'HH:mm');
+					app.sunrise = moment(app.jadwalHariIni.sunrise,'HH:mm'); // Ambil Waktu Syuruq
 					app.dhuhr	= moment(app.jadwalHariIni.dhuhr,'HH:mm');
 					app.asr		= moment(app.jadwalHariIni.asr,'HH:mm');
 					app.maghrib	= moment(app.jadwalHariIni.maghrib,'HH:mm');
@@ -383,16 +428,38 @@
 					jadwalPlusIcon	= '<span><i class="fa fa-plus" aria-hidden="true"></i></span>';
 					// console.log('besok');
 				}
+				
+				// --- LOGIKA SHOW JADWAL BARU DENGAN SYURUQ ---
 				$.each(app.db.prayName, function(k,v) {
-					// console.log(jamDelay.format('YYYY-MM-DD HH:mm:ss'));
-					let css= '';
-					if		(k == 'isha' 	&& jamDelay < app.isha		&& jamDelay > app.maghrib) 	css= 'active';
-					else if	(k == 'maghrib' && jamDelay < app.maghrib	&& jamDelay > app.asr) 		css= 'active';
-					else if	(k == 'asr' 	&& jamDelay < app.asr		&& jamDelay > app.dhuhr) 	css= 'active';
-					else if	(k == 'dhuhr' 	&& jamDelay < app.dhuhr		&& jamDelay > app.fajr) 	css= 'active';
-					else if	(k == 'fajr'	&& (jamDelay < app.fajr		|| jamDelay > app.isha))	css= 'active';//diatas isha dan sebelum subuh (beda hari)
-					jadwal += '<div class="row '+css+'"><div class="col-xs-5">'+v+'</div><div class="col-xs-7">'+jadwalDipake[k] + jadwalPlusIcon + '</div></div>';
+                    
+					// Periksa apakah Syuruq sudah diinisialisasi
+					if (k === 'sunrise' && !app.sunrise) return true;
+					
+					let css = '';
+					
+					// Logika status aktif (penanda waktu saat ini)
+					if (k === 'fajr' && (jamDelay < app.fajr || jamDelay >= app.isha)) {
+						css = 'active'; // Di antara Isha dan Fajr
+					} else if (k === 'sunrise' && jamDelay >= app.fajr && jamDelay < app.dhuhr) {
+						// Aktifkan Syuruq setelah Fajr dan sebelum Dzuhur
+						css = 'active'; 
+					} else if (k === 'dhuhr' && jamDelay >= app.dhuhr && jamDelay < app.asr) {
+						css = 'active';
+					} else if (k === 'asr' && jamDelay >= app.asr && jamDelay < app.maghrib) {
+						css = 'active';
+					} else if (k === 'maghrib' && jamDelay >= app.maghrib && jamDelay < app.isha) {
+						css = 'active';
+					} else if (k === 'isha' && jamDelay >= app.isha) {
+						css = 'active';
+					}
+					
+					let timeValue = jadwalDipake[k] || ''; 
+					
+					jadwal += '<div class="row ' + css + '"><div class="col-xs-5">' + v + '</div><div class="col-xs-7">' + timeValue + jadwalPlusIcon + '</div></div>';
+
 				});
+				// --- END LOGIKA SHOW JADWAL BARU ---
+				
 				$('#jadwal').html(jadwal);
 			},
 			displaySchedule: function(){
@@ -405,33 +472,41 @@
 				// console.log(app.dhuhr.format('YYYY-MM-DD HH:mm:ss'));
 				
 				$.each(app.db.prayName, function(k,v) {
-					//Normal 	: waitAdzanCountDown-adzan-iqomah-sholat-nextPrayCountDown
-					//jumat 	: waitAdzanCountDown-adzan-khutbah-sholat-nextPrayCountDown
-					//tarawih 	: waitAdzanCountDown-adzan-iqomah-sholat-isya-Tarawih(hanya durasi tarawih)-nextPrayCountDown
 					
-					let t			= moment(app[k]);//bikin variable baru t ==> jika ditulis let t	= app[k]; ==> jika di tambah / kurang, variable app[k] ikut berubah
-					let jadwal		= t.format('YYYY-MM-DD HH:mm:ss');
-					let stIqomah	= t.add(app.db.timer.adzan,'minutes').format('YYYY-MM-DD HH:mm:ss');
-					let enIqomah	= moment(stIqomah,'YYYY-MM-DD HH:mm:ss').add(app.db.iqomah[k],'minutes')
-					
-					
-					
-					
-					// console.log('Now-------------- '+jamSekarang);
-					// console.log('time '+v+' : '+jadwal);
-					// console.log('waitAdzan '+v+' : '+waitAdzan);
-					// console.log('st iqomah '+v+' : '+stIqomah);
-					// console.log('en iqomah '+v+' : '+enIqomah.format('YYYY-MM-DD HH:mm:ss'));
-					if(waitAdzan == jadwal)				app.runRightCountDown(app[k],'Menuju '+v);	// CountDown sebelum adzan
-					else if(jadwal == jamSekarang)		app.showDisplayAdzan(v);		// Display adzan
-					else if(stIqomah == jamSekarang){
-						if(moment().format('dddd')=='Friday' && app.db.jumat.active && k=='dhuhr'){
-							//jumatan aktif skip iqomah --> waitAdzanCountDown-adzan-khutbah-sholat-nextPrayCountDown
-							app.showDisplayKhutbah();
+					// Logika hanya berlaku untuk waktu salat Fardhu (bukan Syuruq)
+					if (k !== 'sunrise') { 
+						let t = moment(app[k]); // Gunakan moment() untuk membuat salinan waktu
+
+						// Hitung kapan waktu menuju adzan
+						let jadwal = t.format('YYYY-MM-DD HH:mm:ss');
+						
+						// Pastikan ada nilai di app.db.iqomah[k] sebelum diakses
+						let iqomah_duration = app.db.iqomah[k] || 10; // Default 10 menit
+						
+						let stIqomah = t.add(app.db.timer.adzan, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+						let enIqomah = moment(stIqomah, 'YYYY-MM-DD HH:mm:ss').add(iqomah_duration, 'minutes');
+						
+						
+						if(waitAdzan == jadwal)				app.runRightCountDown(app[k],'Menuju '+v);	// CountDown sebelum adzan
+						else if(jadwal == jamSekarang)		app.showDisplayAdzan(v);		// Display adzan
+						else if(stIqomah == jamSekarang){
+							if(moment().format('dddd')=='Friday' && app.db.jumat.active && k=='dhuhr'){
+								//jumatan aktif skip iqomah --> waitAdzanCountDown-adzan-khutbah-sholat-nextPrayCountDown
+								app.showDisplayKhutbah();
+							}
+							else
+								app.runFullCountDown(enIqomah,'IQOMAH',true);	// CountDown iqomah
 						}
-						else
-							app.runFullCountDown(enIqomah,'IQOMAH',true);	// CountDown iqomah
-					}
+					} 
+                    // Logika Syuruq (Sunrise) - Menggunakan timer yang berbeda (runRightCountDown)
+                    else {
+                        let sunrise_time = moment(app.sunrise); 
+                        
+                        // Cek apakah countdown Syuruq harus ditampilkan
+                        if (waitAdzan == sunrise_time.format('YYYY-MM-DD HH:mm:ss')) {
+                            app.runRightCountDown(sunrise_time, 'Menuju Syuruq');
+                        }
+                    }
 				});
 				
 		
@@ -512,16 +587,64 @@
 					},app.db.jumat.duration * 60 * 1000);// to menit
 				}
 			},
-			showDisplaySholat	: function(){
-				if (!app.khutbahTimer){
+            
+            // FUNGSI BARU: MENAMPILKAN YOUTUBE
+            showDisplayYoutube: function(){
+                let youtube_data = app.db.youtube_display;
+                let video_link = youtube_data.link;
+                
+                if (youtube_data.active && video_link) {
+                    if (!app.youtubeTimer) {
+                        let embed_url = "https://www.youtube.com/embed/" + video_link + "?autoplay=1&controls=0&mute=1&loop=1";
+                        
+                        // Aksi saat video akan tampil
+                        $('#quote').hide(); // Sembunyikan container quote/info
+                        $('#display-youtube iframe').attr('src', embed_url);
+                        $('#display-youtube').show(); 
+                        
+                        app.youtubeTimer = setTimeout(function(){
+                            // Aksi saat video selesai
+                            $('#display-youtube').fadeOut();
+                            $('#display-youtube iframe').attr('src', ''); // Hentikan pemutaran
+                            app.youtubeTimer = false;
+                            $('#quote').show(); // Tampilkan kembali container quote/info
+                            app.showCountDownNextPray(); // Lanjutkan ke timer sholat berikutnya
+                        }, youtube_data.duration * 60 * 1000); // Durasi dari Admin (menit)
+                    }
+                } else {
+                    // Jika tidak aktif, langsung lanjut ke timer sholat berikutnya
+                    app.showCountDownNextPray();
+                }
+            },
+            
+            
+            // FUNGSI LAMA YANG DIMODIFIKASI UNTUK MENYISIPKAN YOUTUBE
+			showDisplaySholat 	: function(){
+				// Ganti app.khutbahTimer dengan app.sholatTimer sebagai gerbang
+				if (!app.sholatTimer){ 
 					//cek tarawih
-					let jamSekarang		= moment();
-					let duration		= (jamSekarang > app.isha && app.db.tarawih.active)?app.db.tarawih.duration:app.db.timer.sholat;
+					let jamSekarang 	= moment();
+					let duration 		= (jamSekarang > app.isha && app.db.tarawih.active)?app.db.tarawih.duration:app.db.timer.sholat;
+					let delay_youtube 	= app.db.youtube_display.delay_after_sholat || 0; // Ambil nilai delay (default 0)
 					$('#display-sholat').show();
-					app.khutbahTimer	= setTimeout(function(){
+					
+					// Timer Sholat menggunakan variabelnya sendiri: app.sholatTimer
+					app.sholatTimer 	= setTimeout(function(){
 						$('#display-sholat').fadeOut();
-						app.khutbahTimer	= false;
-						app.showCountDownNextPray();
+						app.sholatTimer 	= false;
+						
+						// --- LOGIKA PENUNDAAN (DELAY) SEBELUM YOUTUBE MUNCUL ---
+						if (delay_youtube > 0) {
+							// Tunda YouTube
+							setTimeout(function() {
+								app.showDisplayYoutube();
+							}, delay_youtube * 60 * 1000); 
+						} else {
+							// Tanpa delay
+							app.showDisplayYoutube(); 
+						}
+						// --- AKHIR LOGIKA PENUNDAAN ---
+						
 					},duration * 60 * 1000);// to menit
 				}
 			},
@@ -603,59 +726,67 @@
 		}
 		app.initialize();
 
-		/* Tambahkan logika ini ke file display/index.php, setelah inisialisasi app */
-var wallpaper_timer_ms = <?=$info_timer?>; // Menggunakan timer info sebagai fallback jika carousel gagal.
-var carousel_element = $('#main-wallpaper-carousel');
-var current_slide_timer;
+        /* Tambahkan logika ini ke file display/index.php, setelah inisialisasi app */
+        var wallpaper_timer_ms = <?=$info_timer?>; // Menggunakan timer info sebagai fallback jika carousel gagal.
+        var carousel_element = $('#main-wallpaper-carousel');
+        var current_slide_timer;
 
-function startSlideTimer(duration) {
-    // Hentikan timer yang sedang berjalan
-    clearTimeout(current_slide_timer);
-    
-    current_slide_timer = setTimeout(function() {
-        carousel_element.carousel('next'); // Pindah ke slide berikutnya
-    }, duration);
-}
-
-function handleSlideChange(e) {
-    var next_slide = $(e.relatedTarget);
-    var is_video = next_slide.attr('data-is-video');
-
-    if (is_video === 'true') {
-        // 1. Matikan timer standar carousel
-        carousel_element.carousel('pause'); 
-        
-        // 2. Temukan elemen video
-        var video = next_slide.find('video')[0];
-        if (video) {
-            // Hentikan timer default (penting jika ini adalah slide video kedua)
-            clearTimeout(current_slide_timer); 
+        function startSlideTimer(duration) {
+            // Hentikan timer yang sedang berjalan
+            clearTimeout(current_slide_timer);
             
-            // Atur volume ke 0 (karena kita pakai muted di HTML)
-            video.volume = 0; 
-
-            // Hapus listener yang lama
-            $(video).off('ended.videoControl'); 
-
-            // Tambahkan listener untuk event selesai
-            $(video).on('ended.videoControl', function() {
+            current_slide_timer = setTimeout(function() {
                 carousel_element.carousel('next'); // Pindah ke slide berikutnya
-            });
-
-            // Putar video dari awal
-            video.play();
+            }, duration);
         }
-    } else {
-        // Jika ini bukan video, mulai timer standar
-        startSlideTimer(<?=$wallpaper_timer?>); 
-    }
-}
 
-// Tambahkan event listener untuk peristiwa perpindahan slide
-carousel_element.on('slid.bs.carousel', handleSlideChange);
+        function handleSlideChange(e) {
+            var next_slide = $(e.relatedTarget);
+            var is_video = next_slide.attr('data-is-video');
 
-// Inisialisasi: Panggil logika untuk slide pertama saat aplikasi dimulai
-handleSlideChange({relatedTarget: carousel_element.find('.item.active')[0]});
+            if (is_video === 'true') {
+                // 1. Matikan timer standar carousel
+                carousel_element.carousel('pause'); 
+                
+                // 2. Temukan elemen video
+                var video = next_slide.find('video')[0];
+                if (video) {
+                    // Hentikan timer default (penting jika ini adalah slide video kedua)
+                    clearTimeout(current_slide_timer); 
+                    
+                    // Atur volume ke 0 (karena kita pakai muted di HTML)
+                    video.volume = 0; 
+
+                    // Hapus listener yang lama
+                    $(video).off('ended.videoControl'); 
+
+                    // Tambahkan listener untuk event selesai
+                    $(video).on('ended.videoControl', function() {
+                        carousel_element.carousel('next'); // Pindah ke slide berikutnya
+                    });
+
+                    // Putar video dari awal
+                    video.play();
+                }
+            } else {
+                // Jika ini bukan video, mulai timer standar
+                startSlideTimer(<?=$wallpaper_timer?>); 
+            }
+        }
+
+        // Tambahkan event listener untuk peristiwa perpindahan slide
+        carousel_element.on('slid.bs.carousel', handleSlideChange);
+
+        // Inisialisasi: Panggil logika untuk slide pertama saat aplikasi dimulai
+        // Periksa apakah ada slide aktif sebelum memanggil handleSlideChange
+        var activeSlide = carousel_element.find('.item.active')[0];
+        if (activeSlide) {
+            handleSlideChange({relatedTarget: activeSlide}); 
+        } else {
+             // Jika tidak ada slide aktif (misal, tidak ada wallpaper), mulai timer standar
+             startSlideTimer(<?=$wallpaper_timer?>);
+        }
+
 	</script>
 </body>
 </html>
