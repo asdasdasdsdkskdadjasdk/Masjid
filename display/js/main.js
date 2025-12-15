@@ -42,17 +42,13 @@ function showJam(){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+var beep = document.getElementById('adzan-beep');
+if (currentTime == prayerTime) {
+    // Mainkan suara
+    beep.play(); 
+    
+    // ... kode lama untuk highlight jadwal sholat ...
+}
 
 	var currentDate 	= new Date();
 	var bulan 			= ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
