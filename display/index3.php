@@ -97,7 +97,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Display Masjid - Cinematic Fixed Layout</title>
+    <title>Display Masjid</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -469,7 +469,7 @@
             </div>
 
         <div id="running-text-container">
-            <div class="rt-label"><i class="fa fa-info-circle"></i></div>
+            <div class="rt-label"><img src="img/pattern01.png" alt="icon" style="height: 40px; width: auto; filter: invert(1);"></div>
             <div class="rt-content">
                 <marquee>
                     <?php 
